@@ -17,13 +17,13 @@ export default function CheckoutPage() {
 
   if (!user) {
     return (
-      <div className="text-center py-12">
-        <h1 className="text-2xl font-bold text-gray-900">Please login to checkout</h1>
+      <div className="text-center py-20">
+        <h1 className="text-xl font-semibold text-text">Sign in to checkout</h1>
         <Link
           href="/login"
-          className="mt-4 inline-block bg-indigo-600 text-white px-6 py-2 rounded-md hover:bg-indigo-700"
+          className="mt-6 inline-block text-sm bg-text text-white px-6 py-2.5 rounded-full hover:bg-primary-hover transition-colors"
         >
-          Login
+          Sign in
         </Link>
       </div>
     );
@@ -31,13 +31,13 @@ export default function CheckoutPage() {
 
   if (items.length === 0) {
     return (
-      <div className="text-center py-12">
-        <h1 className="text-2xl font-bold text-gray-900">Your cart is empty</h1>
+      <div className="text-center py-20">
+        <h1 className="text-xl font-semibold text-text">Your cart is empty</h1>
         <Link
           href="/"
-          className="mt-4 inline-block bg-indigo-600 text-white px-6 py-2 rounded-md hover:bg-indigo-700"
+          className="mt-6 inline-block text-sm bg-text text-white px-6 py-2.5 rounded-full hover:bg-primary-hover transition-colors"
         >
-          Browse Products
+          Browse products
         </Link>
       </div>
     );
@@ -71,37 +71,39 @@ export default function CheckoutPage() {
 
   return (
     <div className="max-w-2xl mx-auto">
-      <h1 className="text-2xl font-bold text-gray-900 mb-6">Checkout</h1>
+      <h1 className="text-2xl font-semibold tracking-tight text-text mb-8">Checkout</h1>
 
-      <div className="bg-white rounded-lg shadow-sm border p-6 mb-6">
-        <h2 className="font-semibold text-gray-900 mb-4">Order Summary</h2>
+      <div className="border border-border rounded-xl p-6 mb-6">
+        <h2 className="text-sm font-medium text-text-secondary uppercase tracking-wider mb-4">Order Summary</h2>
         {items.map((item) => (
-          <div key={item.product._id} className="flex justify-between text-sm py-1">
-            <span>
-              {item.product.name} x {item.quantity}
+          <div key={item.product._id} className="flex justify-between text-sm py-1.5">
+            <span className="text-text-secondary">
+              {item.product.name} <span className="text-text-tertiary">&times; {item.quantity}</span>
             </span>
-            <span>${(item.product.price * item.quantity).toFixed(2)}</span>
+            <span className="font-medium">${(item.product.price * item.quantity).toFixed(2)}</span>
           </div>
         ))}
-        <div className="flex justify-between font-bold mt-3 pt-3 border-t">
-          <span>Total</span>
-          <span>${total.toFixed(2)}</span>
+        <div className="flex justify-between mt-4 pt-4 border-t border-border">
+          <span className="text-sm text-text-secondary">Total</span>
+          <span className="text-lg font-semibold">${total.toFixed(2)}</span>
         </div>
       </div>
 
-      <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow-sm border p-6">
-        <h2 className="font-semibold text-gray-900 mb-4">Shipping Address</h2>
+      <form onSubmit={handleSubmit} className="border border-border rounded-xl p-6">
+        <h2 className="text-sm font-medium text-text-secondary uppercase tracking-wider mb-4">Shipping Address</h2>
 
-        {error && <p className="text-red-600 text-sm mb-4">{error}</p>}
+        {error && (
+          <p className="text-red-600 text-sm mb-4 bg-red-50 px-4 py-2 rounded-lg">{error}</p>
+        )}
 
-        <div className="space-y-4">
+        <div className="space-y-3">
           <input
             type="text"
             placeholder="Street address"
             required
             value={address.street}
             onChange={(e) => setAddress({ ...address, street: e.target.value })}
-            className="w-full border rounded-md px-3 py-2"
+            className="w-full border border-border rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-text/10 focus:border-text transition-colors placeholder:text-text-tertiary"
           />
           <input
             type="text"
@@ -109,7 +111,7 @@ export default function CheckoutPage() {
             required
             value={address.city}
             onChange={(e) => setAddress({ ...address, city: e.target.value })}
-            className="w-full border rounded-md px-3 py-2"
+            className="w-full border border-border rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-text/10 focus:border-text transition-colors placeholder:text-text-tertiary"
           />
           <input
             type="text"
@@ -117,16 +119,16 @@ export default function CheckoutPage() {
             required
             value={address.country}
             onChange={(e) => setAddress({ ...address, country: e.target.value })}
-            className="w-full border rounded-md px-3 py-2"
+            className="w-full border border-border rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-text/10 focus:border-text transition-colors placeholder:text-text-tertiary"
           />
         </div>
 
         <button
           type="submit"
           disabled={submitting}
-          className="mt-6 w-full bg-indigo-600 text-white py-3 rounded-md hover:bg-indigo-700 disabled:bg-gray-400"
+          className="mt-6 w-full bg-text text-white py-3 rounded-full text-sm font-medium hover:bg-primary-hover transition-colors disabled:opacity-50"
         >
-          {submitting ? "Placing Order..." : `Place Order — $${total.toFixed(2)}`}
+          {submitting ? "Placing order..." : `Place order \u2014 $${total.toFixed(2)}`}
         </button>
       </form>
     </div>

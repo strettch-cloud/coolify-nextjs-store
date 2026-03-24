@@ -22,20 +22,20 @@ export default function Home() {
 
   return (
     <div>
-      <div className="text-center mb-8">
-        <h1 className="text-3xl font-bold text-gray-900">Welcome to ShopEase</h1>
-        <p className="text-gray-500 mt-2">Discover products you love</p>
+      <div className="mb-10">
+        <h1 className="text-3xl font-semibold tracking-tight text-text">Shop</h1>
+        <p className="text-text-secondary mt-1">Discover products you&apos;ll love</p>
       </div>
 
-      <div className="flex justify-center gap-2 mb-8">
+      <div className="flex gap-2 mb-8 overflow-x-auto pb-1">
         {categories.map((cat) => (
           <button
             key={cat}
             onClick={() => setCategory(cat === "All" ? "" : cat)}
-            className={`px-4 py-2 rounded-full text-sm ${
+            className={`px-4 py-1.5 rounded-full text-sm whitespace-nowrap transition-all ${
               (cat === "All" && !category) || cat === category
-                ? "bg-indigo-600 text-white"
-                : "bg-white text-gray-700 border hover:bg-gray-50"
+                ? "bg-text text-white"
+                : "text-text-secondary hover:text-text border border-border hover:border-text"
             }`}
           >
             {cat}
@@ -44,11 +44,24 @@ export default function Home() {
       </div>
 
       {loading ? (
-        <div className="text-center py-12 text-gray-500">Loading products...</div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-10">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <div key={i} className="animate-pulse">
+              <div className="aspect-square rounded-xl bg-muted" />
+              <div className="mt-3 space-y-2">
+                <div className="h-3 bg-muted rounded w-16" />
+                <div className="h-4 bg-muted rounded w-32" />
+                <div className="h-3 bg-muted rounded w-20" />
+              </div>
+            </div>
+          ))}
+        </div>
       ) : products.length === 0 ? (
-        <div className="text-center py-12 text-gray-500">No products found</div>
+        <div className="text-center py-20">
+          <p className="text-text-tertiary">No products found</p>
+        </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-10">
           {products.map((product) => (
             <ProductCard key={product._id} product={product} />
           ))}

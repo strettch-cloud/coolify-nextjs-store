@@ -1,1 +1,24 @@
 @import "tailwindcss";
+
+@theme {
+  --color-primary: #111111;
+  --color-primary-hover: #333333;
+  --color-accent: #6366f1;
+  --color-accent-light: #eef2ff;
+  --color-surface: #ffffff;
+  --color-muted: #f8f8f8;
+  --color-border: #e5e5e5;
+  --color-text: #111111;
+  --color-text-secondary: #6b7280;
+  --color-text-tertiary: #9ca3af;
+}
+
+body {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+::selection {
+  background-color: #6366f1;
+  color: white;
+}

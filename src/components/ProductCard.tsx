@@ -9,34 +9,33 @@ export default function ProductCard({ product }: { product: Product }) {
   const { addToCart } = useCart();
 
   return (
-    <div className="bg-white rounded-lg shadow-sm border overflow-hidden hover:shadow-md transition-shadow">
+    <div className="group">
       <Link href={`/products/${product._id}`}>
-        <div className="relative h-48 w-full">
+        <div className="relative aspect-square w-full overflow-hidden rounded-xl bg-muted">
           <Image
             src={product.image}
             alt={product.name}
             fill
-            className="object-cover"
+            className="object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
           />
         </div>
       </Link>
-      <div className="p-4">
-        <p className="text-xs text-indigo-600 font-medium uppercase">{product.category}</p>
+      <div className="mt-3 space-y-1">
+        <p className="text-xs text-text-tertiary uppercase tracking-wider">{product.category}</p>
         <Link href={`/products/${product._id}`}>
-          <h3 className="font-semibold text-gray-900 mt-1 hover:text-indigo-600">
+          <h3 className="text-sm font-medium text-text group-hover:underline underline-offset-2">
             {product.name}
           </h3>
         </Link>
-        <p className="text-gray-500 text-sm mt-1 line-clamp-2">{product.description}</p>
-        <div className="flex items-center justify-between mt-3">
-          <span className="text-lg font-bold text-gray-900">${product.price.toFixed(2)}</span>
+        <div className="flex items-center justify-between pt-1">
+          <span className="text-sm font-semibold text-text">${product.price.toFixed(2)}</span>
           <button
             onClick={() => addToCart(product)}
             disabled={product.stock === 0}
-            className="bg-indigo-600 text-white px-3 py-1.5 rounded text-sm hover:bg-indigo-700 disabled:bg-gray-300 disabled:cursor-not-allowed"
+            className="text-xs font-medium text-text-secondary hover:text-text border border-border hover:border-text rounded-full px-3 py-1 transition-colors disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:border-border"
           >
-            {product.stock > 0 ? "Add to Cart" : "Out of Stock"}
+            {product.stock > 0 ? "Add to cart" : "Sold out"}
           </button>
         </div>
       </div>
