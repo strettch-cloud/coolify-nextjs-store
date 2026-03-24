@@ -2,7 +2,7 @@
 
 Learn how to deploy a complete ecommerce application — **Next.js** frontend, **Express.js** API, and **MongoDB** database — on a [Strettch Cloud](https://cloud.strettch.com) VPS using [Coolify](https://coolify.io), an open-source self-hosting platform.
 
-By the end of this tutorial, you'll have a fully working app with HTTPS, automated Docker builds, and a dashboard to manage everything.
+By the end of this tutorial, you'll have a fully working app with HTTPS, automated Docker builds, auto-deploy on git push, and a dashboard to manage everything.
 
 ---
 
@@ -49,6 +49,7 @@ Both repositories are public — fork or clone them:
 ## Prerequisites
 
 - A [Strettch Cloud](https://cloud.strettch.com) account
+- A [GitHub](https://github.com) account
 - A domain name (we'll use subdomains for each service)
 - Basic familiarity with the terminal and SSH
 
@@ -149,7 +150,43 @@ For example, if your domain is `example.com`, you'll get:
 
 ---
 
-## Step 4: Deploy MongoDB
+## Step 4: Connect GitHub to Coolify
+
+To enable **automatic deployments on git push**, we'll create a GitHub App that connects Coolify to your repositories. This is the recommended approach — it gives you webhook integration, auto-deploy on push, and PR preview support.
+
+### Fork the repositories
+
+If you haven't already, fork both repos to your GitHub account or organization:
+
+- [strettch/coolify-express-api](https://github.com/strettch/coolify-express-api)
+- [strettch/coolify-nextjs-store](https://github.com/strettch/coolify-nextjs-store)
+
+### Create a GitHub App in Coolify
+
+1. In Coolify, go to **Sources** in the left sidebar
+2. Click **\"+ Add\"**
+3. Select **GitHub**
+4. Fill in the form:
+   - **Name:** Choose a name (e.g., `my-coolify`)
+   - **Organization (on GitHub):** Enter your GitHub organization name, or leave empty to use your personal account
+5. Click **Continue**
+
+This redirects you to GitHub to create the app.
+
+6. On GitHub, click **\"Create GitHub App for [your-org]\"**
+7. You'll be redirected to install the app — click **Install**
+8. Choose **\"Only select repositories\"** and select both:
+   - `coolify-express-api`
+   - `coolify-nextjs-store`
+9. Click **Install**
+
+You'll be redirected back to Coolify. The GitHub source is now connected.
+
+> **Tip:** You can verify the connection in Coolify under **Sources** — you should see your GitHub App listed with a green status.
+
+---
+
+## Step 5: Deploy MongoDB
 
 1. Go to **My first project → production → + New**
 2. Search for **\"mongodb\"**
@@ -173,20 +210,17 @@ Wait until the status shows **\"Running (healthy)\"**.
 
 ---
 
-## Step 5: Deploy the Express.js Backend
+## Step 6: Deploy the Express.js Backend
 
 ### Add the application
 
 1. Go to **My first project → production → + New**
-2. Search for **\"public\"** and select **Public Repository**
-3. Enter the repository URL:
-   ```
-   https://github.com/strettch/coolify-express-api
-   ```
-   (Or use your own fork)
-4. Click **Check repository**
-5. Set **Build Pack** to **Dockerfile**
-6. Click **Continue**
+2. Select **Private Repository (with GitHub App)**
+3. You'll see your connected GitHub App — select it
+4. Choose the **coolify-express-api** repository
+5. Select the **main** branch
+6. Set **Build Pack** to **Dockerfile**
+7. Click **Continue**
 
 ### Configure the application
 
@@ -211,7 +245,7 @@ FRONTEND_URL=https://shopease.yourdomain.com
 ```
 
 > **About the MongoDB URI:**
-> - Take the internal URL from Step 4
+> - Take the internal URL from Step 5
 > - Add `/shopease` after the port to specify the database name
 > - Add `?authSource=admin&directConnection=true` as query parameters
 >
@@ -223,7 +257,7 @@ Click **Save All Environment Variables**.
 ### Deploy
 
 Click the **Deploy** button. Coolify will:
-1. Clone the repository
+1. Clone the repository via the GitHub App
 2. Build the Docker image using the Dockerfile
 3. Start the container on port 5000
 4. Configure Traefik to route `api.shopease.yourdomain.com` to this container
@@ -233,7 +267,7 @@ This takes about 30 seconds. Once deployed, verify it works:
 
 ```bash
 curl https://api.shopease.yourdomain.com/api/health
-# Should return: {\"status\":\"ok\",\"service\":\"shopease-api\"}
+# Should return: {"status":"ok","service":"shopease-api"}
 ```
 
 ### Seed the database
@@ -271,17 +305,14 @@ curl https://api.shopease.yourdomain.com/api/products
 
 ---
 
-## Step 6: Deploy the Next.js Frontend
+## Step 7: Deploy the Next.js Frontend
 
 ### Add the application
 
 1. Go to **My first project → production → + New**
-2. Select **Public Repository**
-3. Enter the repository URL:
-   ```
-   https://github.com/strettch/coolify-nextjs-store
-   ```
-4. Click **Check repository**
+2. Select **Private Repository (with GitHub App)**
+3. Select your GitHub App, then choose the **coolify-nextjs-store** repository
+4. Select the **main** branch
 5. Set **Build Pack** to **Dockerfile**
 6. Click **Continue**
 
@@ -322,7 +353,7 @@ Once deployed, visit `https://shopease.yourdomain.com` — you should see the Sh
 
 ---
 
-## Step 7: Test the Full Application
+## Step 8: Test the Full Application
 
 Walk through the complete user flow:
 
@@ -347,15 +378,24 @@ curl https://api.shopease.yourdomain.com/api/products
 curl https://api.shopease.yourdomain.com/api/products?category=Electronics
 
 # Register a user
-curl -X POST https://api.shopease.yourdomain.com/api/auth/register \\
-  -H \"Content-Type: application/json\" \\
+curl -X POST https://api.shopease.yourdomain.com/api/auth/register \
+  -H \"Content-Type: application/json\" \
   -d '{\"name\": \"Test User\", \"email\": \"test@example.com\", \"password\": \"password123\"}'
 
 # Login
-curl -X POST https://api.shopease.yourdomain.com/api/auth/login \\
-  -H \"Content-Type: application/json\" \\
+curl -X POST https://api.shopease.yourdomain.com/api/auth/login \
+  -H \"Content-Type: application/json\" \
   -d '{\"email\": \"test@example.com\", \"password\": \"password123\"}'
 ```
+
+### Test auto-deploy
+
+Since we set up the GitHub App, any push to the `main` branch will trigger an automatic deployment. Try it:
+
+1. Make a small change to one of the repos (e.g., update a product name in `seed.js`)
+2. Push to `main`
+3. Go to Coolify → your app → **Deployments** tab
+4. You should see a new deployment triggered automatically
 
 ---
 
@@ -434,7 +474,7 @@ The Dockerfile expects a `public/` directory. Make sure it exists in your repo (
 
 ### Frontend shows no products
 - Verify the backend is running: `curl https://api.shopease.yourdomain.com/api/health`
-- Make sure you ran the seed script (Step 5)
+- Make sure you ran the seed script (Step 6)
 - Check that `NEXT_PUBLIC_API_URL` is set correctly and was available at **build time**
 - If you changed the env var, you need to **redeploy** (not just restart) because Next.js bakes it in at build time
 
@@ -451,17 +491,20 @@ while fuser /var/lib/dpkg/lock-frontend >/dev/null 2>&1; do sleep 2; done
 curl -fsSL https://cdn.coollabs.io/coolify/install.sh | bash
 ```
 
+### GitHub App not showing repositories
+Make sure you installed the GitHub App on the correct organization/account and granted access to the specific repositories. You can manage installations at `https://github.com/settings/installations`.
+
 ---
 
 ## What's Next?
 
-Now that your app is deployed, here are some things you could do next:
+Now that your app is deployed with auto-deploy, here are some things you could explore:
 
-- **Add a GitHub App** in Coolify Sources to enable automatic deployments on push
 - **Set up backups** for MongoDB in Coolify (Backups tab on the database)
 - **Add monitoring** with Coolify's built-in metrics
 - **Custom domain** — point your main domain instead of a subdomain
 - **Add more features** — product search, reviews, admin panel, payment integration
+- **Preview deployments** — Coolify can deploy PR branches for review before merging
 
 ---
 
@@ -472,13 +515,14 @@ In this tutorial, we deployed a full-stack ecommerce application on Strettch Clo
 1. Created a VPS on Strettch Cloud (2 vCPUs, 4 GB RAM)
 2. Installed Coolify with a single command
 3. Set up DNS records for three subdomains
-4. Deployed MongoDB as a managed database
-5. Deployed the Express.js API with environment variables
-6. Seeded the database with sample products
-7. Deployed the Next.js frontend with build-time configuration
-8. Tested the complete application end-to-end
+4. Connected GitHub to Coolify with a GitHub App for auto-deploy
+5. Deployed MongoDB as a managed database
+6. Deployed the Express.js API with environment variables
+7. Seeded the database with sample products
+8. Deployed the Next.js frontend with build-time configuration
+9. Tested the complete application end-to-end
 
-All three services are managed through Coolify's dashboard with automatic SSL, Docker builds, and deployment logs — no CI/CD pipeline needed.
+All three services are managed through Coolify's dashboard with automatic SSL, Docker builds, auto-deploy on push, and deployment logs — no CI/CD pipeline needed.
 
 **Links:**
 - [Strettch Cloud](https://cloud.strettch.com)
@@ -486,4 +530,3 @@ All three services are managed through Coolify's dashboard with automatic SSL, D
 - [Frontend Source Code](https://github.com/strettch/coolify-nextjs-store)
 - [Backend Source Code](https://github.com/strettch/coolify-express-api)
 - [Live Demo](https://shopease.strettchcloud.com)
-","message":"docs: add comprehensive deployment tutorial","branch":"main"}
