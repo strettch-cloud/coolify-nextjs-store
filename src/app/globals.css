@@ -3,10 +3,8 @@
 @theme {
   --color-primary: #111111;
   --color-primary-hover: #333333;
-  --color-accent: #6366f1;
-  --color-accent-light: #eef2ff;
   --color-surface: #ffffff;
-  --color-muted: #f8f8f8;
+  --color-muted: #f5f5f5;
   --color-border: #e5e5e5;
   --color-text: #111111;
   --color-text-secondary: #6b7280;
@@ -19,6 +17,6 @@ body {
 }
 
 ::selection {
-  background-color: #6366f1;
+  background-color: #111111;
   color: white;
 }
