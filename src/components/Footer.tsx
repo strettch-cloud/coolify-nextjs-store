@@ -6,14 +6,22 @@ export default function Footer() {
           <p className="text-sm text-text-tertiary">
             ShopEase &mdash; Deployed on{" "}
             <a
-              href="https://strettch.cloud"
+              href="https://cloud.strettch.com"
               target="_blank"
               rel="noopener noreferrer"
               className="text-text-secondary hover:text-text underline underline-offset-2"
             >
               Strettch Cloud
             </a>{" "}
-            with Coolify
+            with{" "}
+            <a
+              href="https://coolify.io"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-text-secondary hover:text-text underline underline-offset-2"
+            >
+              Coolify
+            </a>
           </p>
           <div className="flex gap-6">
             <a
