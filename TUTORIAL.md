@@ -122,12 +122,12 @@ You can access Coolify through your Public IPV4: http://YOUR_VPS_IP:8000
 
 1. Open `http://YOUR_VPS_IP:8000` in your browser
 2. Create your admin account (email + password)
-3. On the onboarding screen, click **\"Let's go!\"**
-4. Choose **\"This Machine\"** (Quick Start) — this deploys everything on the same server running Coolify
-5. Click **\"Create My First Project\"**
-6. Click **\"Go to Dashboard\"**
+3. On the onboarding screen, click **"Let's go!"**
+4. Choose **"This Machine"** (Quick Start) — this deploys everything on the same server running Coolify
+5. Click **"Create My First Project"**
+6. Click **"Go to Dashboard"**
 
-You now have Coolify running with a project called \"My first project\" and a \"production\" environment.
+You now have Coolify running with a project called "My first project" and a "production" environment.
 
 ---
 
@@ -164,7 +164,7 @@ If you haven't already, fork both repos to your GitHub account or organization:
 ### Create a GitHub App in Coolify
 
 1. In Coolify, go to **Sources** in the left sidebar
-2. Click **\"+ Add\"**
+2. Click **"+ Add"**
 3. Select **GitHub**
 4. Fill in the form:
    - **Name:** Choose a name (e.g., `my-coolify`)
@@ -173,9 +173,9 @@ If you haven't already, fork both repos to your GitHub account or organization:
 
 This redirects you to GitHub to create the app.
 
-6. On GitHub, click **\"Create GitHub App for [your-org]\"**
+6. On GitHub, click **"Create GitHub App for [your-org]"**
 7. You'll be redirected to install the app — click **Install**
-8. Choose **\"Only select repositories\"** and select both:
+8. Choose **"Only select repositories"** and select both:
    - `coolify-express-api`
    - `coolify-nextjs-store`
 9. Click **Install**
@@ -189,7 +189,7 @@ You'll be redirected back to Coolify. The GitHub source is now connected.
 ## Step 5: Deploy MongoDB
 
 1. Go to **My first project → production → + New**
-2. Search for **\"mongodb\"**
+2. Search for **"mongodb"**
 3. Click **MongoDB** under the Databases section
 
 Coolify creates the database with auto-generated credentials. On the configuration page, you'll see:
@@ -206,7 +206,7 @@ Coolify creates the database with auto-generated credentials. On the configurati
 
 4. Click **Start** to launch MongoDB
 
-Wait until the status shows **\"Running (healthy)\"**.
+Wait until the status shows **"Running (healthy)"**.
 
 ---
 
@@ -230,6 +230,8 @@ On the configuration page, update these settings:
 - **Name:** `shopease-api`
 - **Domain:** `https://api.shopease.yourdomain.com`
 - **Ports Exposes:** `5000`
+
+> ⚠️ **Critical: The Domain field MUST include `https://`** (e.g., `https://api.shopease.yourdomain.com`). If you enter just `api.shopease.yourdomain.com` without the protocol, Traefik will not be able to route traffic to your app and you'll see "404 page not found" errors. This is the most common deployment mistake.
 
 Click **Save**.
 
@@ -323,6 +325,8 @@ curl https://api.shopease.yourdomain.com/api/products
 - **Domain:** `https://shopease.yourdomain.com`
 - **Ports Exposes:** `3000` (should already be set)
 
+> ⚠️ **Remember: Always include `https://` in the Domain field.** Entering just the domain name without the protocol will break routing.
+
 Click **Save**.
 
 ### Add environment variables
@@ -335,7 +339,7 @@ NEXT_PUBLIC_API_URL=https://api.shopease.yourdomain.com
 
 Click **Save All Environment Variables**.
 
-> **Important:** After saving, switch to **Normal view** and verify that the `NEXT_PUBLIC_API_URL` variable has **\"Available at Buildtime\"** checked. This is required because the Dockerfile uses `ARG NEXT_PUBLIC_API_URL` to inject the API URL during the build process. Coolify enables this by default, but double-check.
+> **Important:** After saving, switch to **Normal view** and verify that the `NEXT_PUBLIC_API_URL` variable has **"Available at Buildtime"** checked. This is required because the Dockerfile uses `ARG NEXT_PUBLIC_API_URL` to inject the API URL during the build process. Coolify enables this by default, but double-check.
 
 ### Deploy
 
@@ -359,7 +363,7 @@ Walk through the complete user flow:
 
 1. **Browse products** — Visit the homepage and try the category filters
 2. **View a product** — Click any product to see the detail page
-3. **Add to cart** — Click \"Add to cart\" on a product
+3. **Add to cart** — Click "Add to cart" on a product
 4. **View cart** — Navigate to the cart page, adjust quantities
 5. **Register** — Create an account (any email/password, min 6 chars)
 6. **Checkout** — Enter a shipping address and place the order
@@ -379,13 +383,13 @@ curl https://api.shopease.yourdomain.com/api/products?category=Electronics
 
 # Register a user
 curl -X POST https://api.shopease.yourdomain.com/api/auth/register \
-  -H \"Content-Type: application/json\" \
-  -d '{\"name\": \"Test User\", \"email\": \"test@example.com\", \"password\": \"password123\"}'
+  -H "Content-Type: application/json" \
+  -d '{"name": "Test User", "email": "test@example.com", "password": "password123"}'
 
 # Login
 curl -X POST https://api.shopease.yourdomain.com/api/auth/login \
-  -H \"Content-Type: application/json\" \
-  -d '{\"email\": \"test@example.com\", \"password\": \"password123\"}'
+  -H "Content-Type: application/json" \
+  -d '{"email": "test@example.com", "password": "password123"}'
 ```
 
 ### Test auto-deploy
@@ -456,6 +460,9 @@ coolify-nextjs-store/
 
 ## Troubleshooting
 
+### "404 page not found" or "no available server" after deploying
+This means Traefik can't route traffic to your app. The most common cause is a **missing `https://` prefix** in the Domain field. Go to your app's configuration in Coolify and make sure the domain looks like `https://yourdomain.com`, not just `yourdomain.com`. After fixing, click **Save** and then **Redeploy**.
+
 ### Build fails with exit code 255
 This is usually a transient Docker BuildKit error. Click **Redeploy** in Coolify. If it persists:
 ```bash
@@ -464,13 +471,13 @@ docker builder prune -f
 ```
 Then redeploy from Coolify.
 
-### Build fails with \"/app/public: not found\"
+### Build fails with "/app/public: not found"
 The Dockerfile expects a `public/` directory. Make sure it exists in your repo (even if empty — add a `.gitkeep` file).
 
 ### MongoDB connection fails
 - Verify the `MONGODB_URI` uses the **internal** hostname (the container ID), not `localhost`
 - Make sure you added `?authSource=admin` to the URI
-- Check that MongoDB is running in Coolify (status should say \"Running (healthy)\")
+- Check that MongoDB is running in Coolify (status should say "Running (healthy)")
 
 ### Frontend shows no products
 - Verify the backend is running: `curl https://api.shopease.yourdomain.com/api/health`
