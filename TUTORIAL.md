@@ -1,22 +1,20 @@
-# Deploy a Full-Stack App on Strettch Cloud with Coolify
+# How to Deploy a Full-Stack Ecommerce App on Strettch Cloud Using Coolify
 
-Learn how to deploy a complete ecommerce application — **Next.js** frontend, **Express.js** API, and **MongoDB** database — on a [Strettch Cloud](https://cloud.strettch.com) VPS using [Coolify](https://coolify.io), an open-source self-hosting platform.
+### Introduction
 
-By the end of this tutorial, you'll have a fully working app with HTTPS, automated Docker builds, auto-deploy on git push, and a dashboard to manage everything.
+In this tutorial, you will deploy **ShopEase**, a full-stack ecommerce application, on a [Strettch Cloud](https://cloud.strettch.com) VPS using [Coolify](https://coolify.io) — an open-source, self-hosted platform for managing app deployments.
 
----
+ShopEase consists of three services: a **Next.js 15** frontend for the storefront, an **Express.js** backend API handling authentication and orders, and a **MongoDB 7** database. Coolify orchestrates all three inside Docker containers and uses **Traefik** as a reverse proxy to handle routing and automatic SSL certificates.
 
-## What We're Building
+By the end of this guide, you will have a production-ready application with HTTPS, automated Docker builds, and auto-deploy on every git push — all managed through a web dashboard.
 
-**ShopEase** — a simple ecommerce store with:
+**Source code:**
 
-- Product browsing and search by category
-- User registration and login (JWT auth)
-- Shopping cart (persisted in localStorage)
-- Checkout with shipping address
-- Order history
+- Frontend: [strettch/coolify-nextjs-store](https://github.com/strettch/coolify-nextjs-store)
+- Backend: [strettch/coolify-express-api](https://github.com/strettch/coolify-express-api)
+- Live demo: [shopease.strettchcloud.com](https://shopease.strettchcloud.com)
 
-### Architecture
+**Architecture overview:**
 
 ```
 Browser → Traefik (reverse proxy + auto-SSL)
@@ -27,74 +25,59 @@ Browser → Traefik (reverse proxy + auto-SSL)
             MongoDB (port 27017, internal only)
 ```
 
-### Source Code
-
-Both repositories are public — fork or clone them:
-
-- **Frontend:** [strettch/coolify-nextjs-store](https://github.com/strettch/coolify-nextjs-store)
-- **Backend:** [strettch/coolify-express-api](https://github.com/strettch/coolify-express-api)
-
-### Tech Stack
-
-| Layer     | Technology               |
-|-----------|--------------------------|
-| Frontend  | Next.js 15, React 19, Tailwind CSS 4 |
-| Backend   | Express.js, Mongoose, JWT |
-| Database  | MongoDB 7                |
-| Platform  | Coolify v4 (self-hosted) |
-| Server    | Strettch Cloud VPS       |
-
----
-
 ## Prerequisites
 
-- A [Strettch Cloud](https://cloud.strettch.com) account
-- A [GitHub](https://github.com) account
-- A domain name (we'll use subdomains for each service)
-- Basic familiarity with the terminal and SSH
+Before you begin, make sure you have the following:
 
----
+- A [Strettch Cloud](https://cloud.strettch.com) account for provisioning a VPS
+- A [GitHub](https://github.com) account to host and connect your repositories
+- A registered domain name with access to its DNS settings (you will create subdomains for each service)
+- Basic familiarity with the terminal, SSH, and command-line tools
 
-## Step 1: Create a VPS on Strettch Cloud
+## Step 1 — Creating a VPS on Strettch Cloud
 
-Log in to [cloud.strettch.com](https://cloud.strettch.com) and create a new virtual server.
+In this step, you will provision a virtual private server on Strettch Cloud. This server will host Coolify and all three application services.
 
-**Recommended specs:**
+1. Log in to [cloud.strettch.com](https://cloud.strettch.com).
+2. Click **Create Server** and configure it with the following specs:
 
-| Setting        | Value              |
-|----------------|--------------------|
-| OS             | Ubuntu 24.04 LTS   |
-| CPU            | 2 vCPUs            |
-| RAM            | 4 GB               |
-| Disk           | 40 GB+ SSD         |
+   | Setting  | Value             |
+   | -------- | ----------------- |
+   | OS       | Ubuntu 24.04 LTS  |
+   | CPU      | 2 vCPUs           |
+   | RAM      | 4 GB              |
+   | Disk     | 40 GB+ SSD        |
 
-> **Why 4 GB RAM?** Coolify itself uses ~1.5 GB. MongoDB, the backend, and especially the Next.js Docker build need the rest. 2 GB will likely cause build failures.
+3. Click **Create** and wait for the server to become active.
+4. Note your server's **public IP address**. This tutorial refers to it as `YOUR_VPS_IP`.
 
-Once created, note your server's **public IP address**. We'll refer to it as `YOUR_VPS_IP` throughout this tutorial.
+> **Note:** 4 GB of RAM is the recommended minimum. Coolify itself uses approximately 1.5 GB, and the Next.js Docker build process requires additional memory. Servers with 2 GB of RAM will likely experience build failures.
 
-### SSH into your server
+Once the server is ready, connect via SSH:
 
 ```bash
 ssh root@YOUR_VPS_IP
 ```
 
-If your server uses a custom SSH port (like Strettch Cloud does), add `-p YOUR_PORT`:
+If your server uses a custom SSH port (Strettch Cloud uses port `222`), specify it with the `-p` flag:
 
 ```bash
 ssh root@YOUR_VPS_IP -p 222
 ```
 
----
+You now have a running VPS ready for Coolify installation.
 
-## Step 2: Install Coolify
+## Step 2 — Installing Coolify
 
-Coolify provides a single command that installs everything — Docker, Docker Compose, and Coolify itself:
+In this step, you will install Coolify on your VPS. Coolify provides a one-line installer that sets up Docker, Docker Compose, and the Coolify platform automatically.
+
+Run the following command on your server:
 
 ```bash
 curl -fsSL https://cdn.coollabs.io/coolify/install.sh | bash
 ```
 
-This takes 2–5 minutes depending on your server's connection speed. You'll see output like:
+The installation takes 2 to 5 minutes. You will see progress output as it completes each stage:
 
 ```
 Step 1/9: Installing required packages
@@ -104,140 +87,147 @@ Step 3/9: Checking Docker installation
 Step 9/9: Installing Coolify
 ```
 
-> **Note:** If you see an error about `dpkg lock`, it means the system is running background updates. Wait a minute and try again:
-> ```bash
-> # Wait for the lock to release, then install
-> while fuser /var/lib/dpkg/lock-frontend >/dev/null 2>&1; do sleep 2; done
-> curl -fsSL https://cdn.coollabs.io/coolify/install.sh | bash
-> ```
-
-When it finishes, you'll see:
+When it finishes, you will see a message like:
 
 ```
 Your instance is ready to use!
 You can access Coolify through your Public IPV4: http://YOUR_VPS_IP:8000
 ```
 
-### Complete initial setup
+> **Note:** If you encounter a `dpkg lock` error, the system is running background package updates. Wait a moment and retry:
+>
+> ```bash
+> while fuser /var/lib/dpkg/lock-frontend >/dev/null 2>&1; do sleep 2; done
+> curl -fsSL https://cdn.coollabs.io/coolify/install.sh | bash
+> ```
 
-1. Open `http://YOUR_VPS_IP:8000` in your browser
-2. Create your admin account (email + password)
-3. On the onboarding screen, click **"Let's go!"**
-4. Choose **"This Machine"** (Quick Start) — this deploys everything on the same server running Coolify
-5. Click **"Create My First Project"**
-6. Click **"Go to Dashboard"**
+### Completing the Initial Setup
 
-You now have Coolify running with a project called "My first project" and a "production" environment.
+1. Open `http://YOUR_VPS_IP:8000` in your browser.
+2. Create your admin account by entering an email and password.
+3. On the onboarding screen, click **Let's go!**
+4. Choose **This Machine (Quick Start)** — this deploys everything on the same server running Coolify.
+5. Click **Create My First Project**.
+6. Click **Go to Dashboard**.
 
----
+You now have Coolify running with a default project called "My first project" and a "production" environment.
 
-## Step 3: Set Up DNS Records
+## Step 3 — Setting Up DNS Records
 
-Before deploying, point your subdomains to the server. In your DNS provider, create three **A records**:
+In this step, you will create DNS records that point your subdomains to the VPS. This is required before deploying any services so that Traefik can route traffic and provision SSL certificates.
 
-| Type | Name              | Value        | TTL |
-|------|-------------------|--------------|-----|
-| A    | `shopease`        | YOUR_VPS_IP  | 300 |
-| A    | `api.shopease`    | YOUR_VPS_IP  | 300 |
-| A    | `coolify`         | YOUR_VPS_IP  | 300 |
+In your domain registrar or DNS provider, create three **A records** pointing to your VPS IP address:
 
-For example, if your domain is `example.com`, you'll get:
-- `shopease.example.com` — frontend
-- `api.shopease.example.com` — backend API
-- `coolify.example.com` — Coolify dashboard
+| Type | Name           | Value       | TTL |
+| ---- | -------------- | ----------- | --- |
+| A    | `shopease`     | YOUR_VPS_IP | 300 |
+| A    | `api.shopease` | YOUR_VPS_IP | 300 |
+| A    | `coolify`      | YOUR_VPS_IP | 300 |
 
-> DNS propagation usually takes 1–5 minutes. You can verify with: `dig shopease.yourdomain.com +short`
+For example, if your domain is `example.com`, these records will create:
 
----
+- `shopease.example.com` — the Next.js frontend
+- `api.shopease.example.com` — the Express.js backend API
+- `coolify.example.com` — the Coolify dashboard
 
-## Step 4: Connect GitHub to Coolify
+DNS propagation usually takes 1 to 5 minutes. You can verify that your records are active by running:
 
-To enable **automatic deployments on git push**, we'll create a GitHub App that connects Coolify to your repositories. This is the recommended approach — it gives you webhook integration, auto-deploy on push, and PR preview support.
+```bash
+dig shopease.yourdomain.com +short
+```
 
-### Fork the repositories
+You should see your VPS IP address in the output.
 
-If you haven't already, fork both repos to your GitHub account or organization:
+## Step 4 — Connecting GitHub to Coolify
+
+In this step, you will create a GitHub App that connects Coolify to your repositories. This enables automatic deployments whenever you push to the `main` branch.
+
+### Forking the Repositories
+
+If you have not already, fork both project repositories to your GitHub account or organization:
 
 - [strettch/coolify-express-api](https://github.com/strettch/coolify-express-api)
 - [strettch/coolify-nextjs-store](https://github.com/strettch/coolify-nextjs-store)
 
-### Create a GitHub App in Coolify
+### Creating the GitHub App
 
-1. In Coolify, go to **Sources** in the left sidebar
-2. Click **"+ Add"**
-3. Select **GitHub**
+1. In Coolify, click **Sources** in the left sidebar.
+2. Click **+ Add**.
+3. Select **GitHub**.
 4. Fill in the form:
-   - **Name:** Choose a name (e.g., `my-coolify`)
-   - **Organization (on GitHub):** Enter your GitHub organization name, or leave empty to use your personal account
-5. Click **Continue**
+   - **Name:** A descriptive name for the app (for example, `my-coolify`)
+   - **Organization (on GitHub):** Your GitHub organization name. Leave empty to use your personal account.
+5. Click **Continue**. Coolify redirects you to GitHub.
+6. On the GitHub page, click **Create GitHub App for [your-org]**.
 
-This redirects you to GitHub to create the app.
+### Installing the GitHub App
 
-6. On GitHub, click **"Create GitHub App for [your-org]"**
-7. You'll be redirected to install the app — click **Install**
-8. Choose **"Only select repositories"** and select both:
+7. After creation, GitHub prompts you to install the app. Click **Install**.
+8. Select **Only select repositories** and choose both:
    - `coolify-express-api`
    - `coolify-nextjs-store`
-9. Click **Install**
+9. Click **Install**.
 
-You'll be redirected back to Coolify. The GitHub source is now connected.
+You will be redirected back to Coolify. The GitHub source now appears under **Sources** with a connected status.
 
-> **Tip:** You can verify the connection in Coolify under **Sources** — you should see your GitHub App listed with a green status.
+> **Note:** If you need to grant access to additional repositories later, you can manage the GitHub App installation at `https://github.com/settings/installations`.
 
----
+## Step 5 — Deploying MongoDB
 
-## Step 5: Deploy MongoDB
+In this step, you will deploy a MongoDB database inside Coolify. The backend API will connect to this database using an internal Docker network URL.
 
-1. Go to **My first project → production → + New**
-2. Search for **"mongodb"**
-3. Click **MongoDB** under the Databases section
+1. Navigate to **My first project → production** and click **+ New**.
+2. Search for `mongodb` and select **MongoDB** under the Databases section.
 
-Coolify creates the database with auto-generated credentials. On the configuration page, you'll see:
+Coolify creates the database with auto-generated credentials. On the configuration page, you will see:
 
 - **Image:** `mongo:7`
 - **Username:** `root` (auto-generated)
-- **Password:** a long random string (auto-generated)
-- **Mongo URL (internal):** something like:
+- **Password:** A randomly generated string
+- **Mongo URL (internal):** A connection string similar to:
+
   ```
   mongodb://root:GENERATED_PASSWORD@CONTAINER_ID:27017/?directConnection=true
   ```
 
-> **Important:** Copy the **Mongo URL (internal)** — you'll need it for the backend's environment variables. We'll modify it slightly when configuring the backend.
+3. Copy the **Mongo URL (internal)** value. You will need it in Step 6.
+4. Click **Start** to launch MongoDB.
 
-4. Click **Start** to launch MongoDB
+Wait until the status changes to **Running (healthy)** before proceeding.
 
-Wait until the status shows **"Running (healthy)"**.
+> **Note:** The internal URL uses a Docker container hostname, not `localhost`. This is how services communicate within the Coolify Docker network.
 
----
+## Step 6 — Deploying the Express.js Backend
 
-## Step 6: Deploy the Express.js Backend
+In this step, you will deploy the Express.js API, configure its environment variables, and seed the database with sample product data.
 
-### Add the application
+### Adding the Application
 
-1. Go to **My first project → production → + New**
-2. Select **Private Repository (with GitHub App)**
-3. You'll see your connected GitHub App — select it
-4. Choose the **coolify-express-api** repository
-5. Select the **main** branch
-6. Set **Build Pack** to **Dockerfile**
-7. Click **Continue**
+1. Navigate to **My first project → production** and click **+ New**.
+2. Select **Private Repository (with GitHub App)**.
+3. Choose your connected GitHub App from the list.
+4. Select the `coolify-express-api` repository.
+5. Select the `main` branch.
+6. Set **Build Pack** to **Dockerfile**.
+7. Click **Continue**.
 
-### Configure the application
+### Configuring the Domain
 
-On the configuration page, update these settings:
+On the configuration page, update the following settings under **General**:
 
-**General:**
 - **Name:** `shopease-api`
 - **Domain:** `https://api.shopease.yourdomain.com`
 - **Ports Exposes:** `5000`
 
-> ⚠️ **Critical: The Domain field MUST include `https://`** (e.g., `https://api.shopease.yourdomain.com`). If you enter just `api.shopease.yourdomain.com` without the protocol, Traefik will not be able to route traffic to your app and you'll see "404 page not found" errors. This is the most common deployment mistake.
+> **Warning:** The Domain field **must** include the `https://` prefix. For example, enter `https://api.shopease.yourdomain.com` — not `api.shopease.yourdomain.com`. If you omit the protocol, Traefik will fail to route traffic to your application. You will see "404 page not found" errors, and SSL will not be provisioned. This is the single most common deployment mistake with Coolify.
 
 Click **Save**.
 
-### Add environment variables
+### Setting Environment Variables
 
-Go to the **Environment Variables** tab and click **Developer view**. Paste these variables:
+1. Go to the **Environment Variables** tab.
+2. Click **Developer view**.
+3. Paste the following variables:
 
 ```env
 MONGODB_URI=mongodb://root:GENERATED_PASSWORD@CONTAINER_ID:27017/shopease?authSource=admin&directConnection=true
@@ -246,53 +236,46 @@ PORT=5000
 FRONTEND_URL=https://shopease.yourdomain.com
 ```
 
-> **About the MongoDB URI:**
-> - Take the internal URL from Step 5
-> - Add `/shopease` after the port to specify the database name
-> - Add `?authSource=admin&directConnection=true` as query parameters
->
-> Example: If your internal URL is `mongodb://root:abc123@n58y4pvy:27017/?directConnection=true`, change it to:
-> `mongodb://root:abc123@n58y4pvy:27017/shopease?authSource=admin&directConnection=true`
+4. Click **Save All Environment Variables**.
 
-Click **Save All Environment Variables**.
+> **Note:** The `MONGODB_URI` value requires modification from the internal URL you copied in Step 5. Take the original URL and make two changes: add `/shopease` after the port number to specify the database name, and replace the query string with `?authSource=admin&directConnection=true`. For example, if the internal URL is `mongodb://root:abc123@n58y4pvy:27017/?directConnection=true`, change it to `mongodb://root:abc123@n58y4pvy:27017/shopease?authSource=admin&directConnection=true`.
 
-### Deploy
+### Deploying
 
-Click the **Deploy** button. Coolify will:
-1. Clone the repository via the GitHub App
-2. Build the Docker image using the Dockerfile
-3. Start the container on port 5000
-4. Configure Traefik to route `api.shopease.yourdomain.com` to this container
-5. Automatically provision an SSL certificate via Let's Encrypt
+Click the **Deploy** button. Coolify will clone the repository, build the Docker image, start the container, configure Traefik routing, and provision an SSL certificate via Let's Encrypt. This process takes approximately 30 seconds.
 
-This takes about 30 seconds. Once deployed, verify it works:
+Once the deployment succeeds, verify the API is running:
 
 ```bash
 curl https://api.shopease.yourdomain.com/api/health
-# Should return: {"status":"ok","service":"shopease-api"}
 ```
 
-### Seed the database
+You should see:
 
-The backend includes a seed script with 10 sample products. To run it:
+```
+{"status":"ok","service":"shopease-api"}
+```
 
-1. Go to the **Terminal** tab for shopease-api in Coolify
-2. Run:
-   ```bash
-   node src/seed.js
-   ```
+### Seeding the Database
 
-Or via SSH:
+The backend includes a seed script that populates the database with 10 sample products. To run it, go to the **Terminal** tab for `shopease-api` in Coolify and execute:
+
+```bash
+node src/seed.js
+```
+
+Alternatively, you can run it via SSH:
 
 ```bash
 # Find the backend container name
 docker ps --format '{{.Names}}' | grep -v coolify | grep -v mongo
 
-# Exec into it and run the seed
+# Run the seed script
 docker exec CONTAINER_NAME node src/seed.js
 ```
 
-You should see:
+You should see output like:
+
 ```
 Connected to MongoDB
 Cleared existing products
@@ -300,76 +283,83 @@ Seeded 10 products
 Done!
 ```
 
-Verify:
+Verify that the products are available:
+
 ```bash
 curl https://api.shopease.yourdomain.com/api/products
 ```
 
----
+## Step 7 — Deploying the Next.js Frontend
 
-## Step 7: Deploy the Next.js Frontend
+In this step, you will deploy the Next.js storefront and connect it to the backend API using a build-time environment variable.
 
-### Add the application
+### Adding the Application
 
-1. Go to **My first project → production → + New**
-2. Select **Private Repository (with GitHub App)**
-3. Select your GitHub App, then choose the **coolify-nextjs-store** repository
-4. Select the **main** branch
-5. Set **Build Pack** to **Dockerfile**
-6. Click **Continue**
+1. Navigate to **My first project → production** and click **+ New**.
+2. Select **Private Repository (with GitHub App)**.
+3. Choose your GitHub App, then select the `coolify-nextjs-store` repository.
+4. Select the `main` branch.
+5. Set **Build Pack** to **Dockerfile**.
+6. Click **Continue**.
 
-### Configure the application
+### Configuring the Domain
 
-**General:**
+On the configuration page, update the following settings under **General**:
+
 - **Name:** `shopease-store`
 - **Domain:** `https://shopease.yourdomain.com`
-- **Ports Exposes:** `3000` (should already be set)
+- **Ports Exposes:** `3000`
 
-> ⚠️ **Remember: Always include `https://` in the Domain field.** Entering just the domain name without the protocol will break routing.
+> **Warning:** As with the backend, the Domain field **must** include `https://`. Enter `https://shopease.yourdomain.com` — not `shopease.yourdomain.com`. Omitting the protocol will break Traefik routing and prevent SSL provisioning.
 
 Click **Save**.
 
-### Add environment variables
+### Setting Environment Variables
 
-Go to **Environment Variables** tab → **Developer view** and add:
+1. Go to the **Environment Variables** tab.
+2. Click **Developer view**.
+3. Add the following variable:
 
 ```env
 NEXT_PUBLIC_API_URL=https://api.shopease.yourdomain.com
 ```
 
-Click **Save All Environment Variables**.
+4. Click **Save All Environment Variables**.
+5. Switch to **Normal view** and verify that `NEXT_PUBLIC_API_URL` has the **Available at Buildtime** checkbox enabled.
 
-> **Important:** After saving, switch to **Normal view** and verify that the `NEXT_PUBLIC_API_URL` variable has **"Available at Buildtime"** checked. This is required because the Dockerfile uses `ARG NEXT_PUBLIC_API_URL` to inject the API URL during the build process. Coolify enables this by default, but double-check.
+> **Note:** The `NEXT_PUBLIC_API_URL` variable must be available at build time because the Dockerfile uses `ARG NEXT_PUBLIC_API_URL` to inject the API URL during the Next.js build process. Coolify enables this by default, but you should confirm it is checked. If you change this value later, you must **redeploy** (not just restart) the application for the change to take effect.
 
-### Deploy
+### Deploying
 
-Click **Deploy**. The Next.js build takes longer than the backend (1–2 minutes) because it:
-1. Installs dependencies
-2. Builds the Next.js app (compiles pages, generates static content)
-3. Creates a standalone production image
+Click **Deploy**. The Next.js build is more resource-intensive than the backend and takes 1 to 2 minutes. It installs dependencies, compiles all pages, generates static content, and creates a standalone production image.
 
-> **Build failures:** If the build fails with exit code 255, it's usually a transient Docker BuildKit issue. Click **Redeploy** to try again. If it keeps failing, try clearing the Docker build cache via SSH:
+> **Note:** If the build fails with exit code 255, this is typically a transient Docker BuildKit issue. Click **Redeploy** to try again. If the error persists, clear the Docker build cache via SSH:
+>
 > ```bash
 > docker builder prune -f
 > ```
 
-Once deployed, visit `https://shopease.yourdomain.com` — you should see the ShopEase store with all 10 products!
+Once deployed, visit `https://shopease.yourdomain.com` in your browser. You should see the ShopEase storefront displaying all 10 products.
 
----
+## Step 8 — Testing the Application
 
-## Step 8: Test the Full Application
+In this step, you will verify that the full application works end-to-end, test API endpoints directly, and confirm that auto-deploy is functional.
 
-Walk through the complete user flow:
+### Testing the User Flow
 
-1. **Browse products** — Visit the homepage and try the category filters
-2. **View a product** — Click any product to see the detail page
-3. **Add to cart** — Click "Add to cart" on a product
-4. **View cart** — Navigate to the cart page, adjust quantities
-5. **Register** — Create an account (any email/password, min 6 chars)
-6. **Checkout** — Enter a shipping address and place the order
-7. **View orders** — Check your order history
+Walk through the complete storefront experience:
 
-### API endpoints to test
+1. **Browse products** — Visit the homepage and use the category filters.
+2. **View a product** — Click any product card to see its detail page.
+3. **Add to cart** — Click "Add to cart" on a product.
+4. **View cart** — Navigate to the cart page and adjust quantities.
+5. **Register** — Create an account with any email and a password of at least 6 characters.
+6. **Checkout** — Enter a shipping address and place the order.
+7. **View orders** — Check your order history page.
+
+### Testing API Endpoints
+
+Use `curl` to verify the backend API directly:
 
 ```bash
 # Health check
@@ -378,162 +368,72 @@ curl https://api.shopease.yourdomain.com/api/health
 # Get all products
 curl https://api.shopease.yourdomain.com/api/products
 
-# Get products by category
+# Filter products by category
 curl https://api.shopease.yourdomain.com/api/products?category=Electronics
 
-# Register a user
+# Register a new user
 curl -X POST https://api.shopease.yourdomain.com/api/auth/register \
   -H "Content-Type: application/json" \
   -d '{"name": "Test User", "email": "test@example.com", "password": "password123"}'
 
-# Login
+# Log in
 curl -X POST https://api.shopease.yourdomain.com/api/auth/login \
   -H "Content-Type: application/json" \
   -d '{"email": "test@example.com", "password": "password123"}'
 ```
 
-### Test auto-deploy
+### Testing Auto-Deploy
 
-Since we set up the GitHub App, any push to the `main` branch will trigger an automatic deployment. Try it:
+Since you connected GitHub via a GitHub App in Step 4, any push to the `main` branch triggers an automatic deployment. To test this:
 
-1. Make a small change to one of the repos (e.g., update a product name in `seed.js`)
-2. Push to `main`
-3. Go to Coolify → your app → **Deployments** tab
-4. You should see a new deployment triggered automatically
+1. Make a small change in one of your forked repositories (for example, update a product name in `src/seed.js`).
+2. Commit and push the change to `main`.
+3. In Coolify, navigate to your application and open the **Deployments** tab.
+4. You should see a new deployment triggered automatically within a few seconds.
 
----
+## Conclusion
 
-## Project Structure
+You have successfully deployed a full-stack ecommerce application on Strettch Cloud using Coolify. Your setup includes:
 
-### Backend (`coolify-express-api`)
+- A **Strettch Cloud VPS** running Ubuntu 24.04 with Coolify installed
+- A **MongoDB** database accessible only through the internal Docker network
+- An **Express.js** backend API with JWT authentication, seeded with sample data
+- A **Next.js** frontend storefront connected to the API
+- **Automatic SSL** certificates provisioned by Traefik via Let's Encrypt
+- **Auto-deploy on push** through the GitHub App integration
 
-```
-coolify-express-api/
-├── src/
-│   ├── index.js           # Express app entry point
-│   ├── config/db.js       # MongoDB connection
-│   ├── middleware/auth.js  # JWT authentication
-│   ├── models/
-│   │   ├── User.js        # User model (bcrypt password hashing)
-│   │   ├── Product.js     # Product model
-│   │   └── Order.js       # Order model
-│   ├── routes/
-│   │   ├── auth.js        # POST /register, POST /login, GET /me
-│   │   ├── products.js    # GET /, GET /:id
-│   │   └── orders.js      # POST / (auth), GET / (auth)
-│   └── seed.js            # Seed 10 sample products
-├── Dockerfile
-├── .env.example
-└── package.json
-```
+From here, you can explore additional Coolify features such as [database backups](https://coolify.io/docs), built-in monitoring and metrics, or preview deployments for pull request branches. You can also extend ShopEase with features like product search, reviews, an admin panel, or payment integration.
 
-### Frontend (`coolify-nextjs-store`)
+For more information, refer to the following resources:
 
-```
-coolify-nextjs-store/
-├── src/
-│   ├── app/
-│   │   ├── layout.tsx          # Root layout with providers
-│   │   ├── page.tsx            # Home — product grid
-│   │   ├── products/[id]/      # Product detail page
-│   │   ├── cart/               # Shopping cart
-│   │   ├── checkout/           # Checkout form
-│   │   ├── login/              # Login page
-│   │   ├── register/           # Registration page
-│   │   └── orders/             # Order history
-│   ├── components/
-│   │   ├── Navbar.tsx          # Navigation bar
-│   │   ├── Footer.tsx          # Footer with links
-│   │   ├── ProductCard.tsx     # Product card component
-│   │   └── CartItem.tsx        # Cart item component
-│   ├── context/
-│   │   ├── AuthContext.tsx      # Authentication state
-│   │   └── CartContext.tsx      # Cart state (localStorage)
-│   └── lib/
-│       └── api.ts              # Axios HTTP client
-├── Dockerfile                   # Multi-stage build (standalone)
-├── .env.example
-└── package.json
-```
-
----
-
-## Troubleshooting
-
-### "404 page not found" or "no available server" after deploying
-This means Traefik can't route traffic to your app. The most common cause is a **missing `https://` prefix** in the Domain field. Go to your app's configuration in Coolify and make sure the domain looks like `https://yourdomain.com`, not just `yourdomain.com`. After fixing, click **Save** and then **Redeploy**.
-
-### Build fails with exit code 255
-This is usually a transient Docker BuildKit error. Click **Redeploy** in Coolify. If it persists:
-```bash
-ssh root@YOUR_VPS_IP
-docker builder prune -f
-```
-Then redeploy from Coolify.
-
-### Build fails with "/app/public: not found"
-The Dockerfile expects a `public/` directory. Make sure it exists in your repo (even if empty — add a `.gitkeep` file).
-
-### MongoDB connection fails
-- Verify the `MONGODB_URI` uses the **internal** hostname (the container ID), not `localhost`
-- Make sure you added `?authSource=admin` to the URI
-- Check that MongoDB is running in Coolify (status should say "Running (healthy)")
-
-### Frontend shows no products
-- Verify the backend is running: `curl https://api.shopease.yourdomain.com/api/health`
-- Make sure you ran the seed script (Step 6)
-- Check that `NEXT_PUBLIC_API_URL` is set correctly and was available at **build time**
-- If you changed the env var, you need to **redeploy** (not just restart) because Next.js bakes it in at build time
-
-### SSL certificate not working
-Traefik auto-provisions certificates via Let's Encrypt. Make sure:
-- DNS records are pointing to your VPS IP
-- Port 80 and 443 are not blocked by a firewall
-- The domain in Coolify starts with `https://`
-
-### dpkg lock error during Coolify installation
-The server is running background updates. Wait and retry:
-```bash
-while fuser /var/lib/dpkg/lock-frontend >/dev/null 2>&1; do sleep 2; done
-curl -fsSL https://cdn.coollabs.io/coolify/install.sh | bash
-```
-
-### GitHub App not showing repositories
-Make sure you installed the GitHub App on the correct organization/account and granted access to the specific repositories. You can manage installations at `https://github.com/settings/installations`.
-
----
-
-## What's Next?
-
-Now that your app is deployed with auto-deploy, here are some things you could explore:
-
-- **Set up backups** for MongoDB in Coolify (Backups tab on the database)
-- **Add monitoring** with Coolify's built-in metrics
-- **Custom domain** — point your main domain instead of a subdomain
-- **Add more features** — product search, reviews, admin panel, payment integration
-- **Preview deployments** — Coolify can deploy PR branches for review before merging
-
----
-
-## Summary
-
-In this tutorial, we deployed a full-stack ecommerce application on Strettch Cloud using Coolify:
-
-1. Created a VPS on Strettch Cloud (2 vCPUs, 4 GB RAM)
-2. Installed Coolify with a single command
-3. Set up DNS records for three subdomains
-4. Connected GitHub to Coolify with a GitHub App for auto-deploy
-5. Deployed MongoDB as a managed database
-6. Deployed the Express.js API with environment variables
-7. Seeded the database with sample products
-8. Deployed the Next.js frontend with build-time configuration
-9. Tested the complete application end-to-end
-
-All three services are managed through Coolify's dashboard with automatic SSL, Docker builds, auto-deploy on push, and deployment logs — no CI/CD pipeline needed.
-
-**Links:**
 - [Strettch Cloud](https://cloud.strettch.com)
 - [Coolify Documentation](https://coolify.io/docs)
 - [Frontend Source Code](https://github.com/strettch/coolify-nextjs-store)
 - [Backend Source Code](https://github.com/strettch/coolify-express-api)
 - [Live Demo](https://shopease.strettchcloud.com)
+
+## FAQs
+
+**Q: Why do I need 4 GB of RAM? Can I use a smaller server?**
+
+Coolify itself consumes approximately 1.5 GB of RAM. The Next.js Docker build process is memory-intensive and requires additional headroom. With only 2 GB of RAM, builds are likely to fail with out-of-memory errors. A server with 2 vCPUs and 4 GB of RAM is the recommended minimum for this stack.
+
+**Q: Why does the Domain field in Coolify require the `https://` prefix?**
+
+Coolify uses the protocol in the Domain field to configure Traefik routing rules and SSL certificate provisioning. When you include `https://`, Traefik knows to request a Let's Encrypt certificate and terminate TLS. Without it, Traefik cannot route traffic correctly, resulting in "404 page not found" errors.
+
+**Q: I changed `NEXT_PUBLIC_API_URL` but the frontend still points to the old URL. What happened?**
+
+Next.js bakes `NEXT_PUBLIC_` environment variables into the JavaScript bundle at build time. Restarting the container does not update these values. You must trigger a full **Redeploy** from the Coolify dashboard so that Next.js rebuilds with the new value.
+
+**Q: Can I use a different database instead of MongoDB?**
+
+Yes. Coolify supports PostgreSQL, MySQL, MariaDB, and Redis out of the box. However, the ShopEase backend is built with Mongoose (a MongoDB ODM), so switching databases would require rewriting the data layer.
+
+**Q: How do I set up automatic database backups?**
+
+In Coolify, navigate to your MongoDB resource and open the **Backups** tab. You can configure scheduled backups to local storage or an S3-compatible object storage provider. Refer to the [Coolify documentation](https://coolify.io/docs) for detailed backup configuration instructions.
+
+**Q: The build failed with exit code 255. What should I do?**
+
+This is typically a transient Docker BuildKit error. Click **Redeploy** in Coolify to retry. If the error persists, SSH into your server and clear the build cache with `docker builder prune -f`, then redeploy from the Coolify dashboard.
