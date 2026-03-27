@@ -25,7 +25,7 @@ export default function Footer() {
           </p>
           <div className="flex gap-6">
             <a
-              href="https://github.com/strettch/coolify-nextjs-store"
+              href="https://github.com/strettch-cloud/coolify-nextjs-store"
               target="_blank"
               rel="noopener noreferrer"
               className="text-sm text-text-tertiary hover:text-text transition-colors"
