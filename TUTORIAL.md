@@ -10,8 +10,8 @@ By the end of this guide, you will have a production-ready application with HTTP
 
 **Source code:**
 
-- Frontend: [strettch/coolify-nextjs-store](https://github.com/strettch/coolify-nextjs-store)
-- Backend: [strettch/coolify-express-api](https://github.com/strettch/coolify-express-api)
+- Frontend: [strettch-cloud/coolify-nextjs-store](https://github.com/strettch-cloud/coolify-nextjs-store)
+- Backend: [strettch-cloud/coolify-express-api](https://github.com/strettch-cloud/coolify-express-api)
 - Live demo: [shopease.strettchcloud.com](https://shopease.strettchcloud.com)
 
 **Architecture overview:**
@@ -146,8 +146,8 @@ In this step, you will create a GitHub App that connects Coolify to your reposit
 
 If you have not already, fork both project repositories to your GitHub account or organization:
 
-- [strettch/coolify-express-api](https://github.com/strettch/coolify-express-api)
-- [strettch/coolify-nextjs-store](https://github.com/strettch/coolify-nextjs-store)
+- [strettch-cloud/coolify-express-api](https://github.com/strettch-cloud/coolify-express-api)
+- [strettch-cloud/coolify-nextjs-store](https://github.com/strettch-cloud/coolify-nextjs-store)
 
 ### Creating the GitHub App
 
@@ -408,8 +408,8 @@ For more information, refer to the following resources:
 
 - [Strettch Cloud](https://cloud.strettch.com)
 - [Coolify Documentation](https://coolify.io/docs)
-- [Frontend Source Code](https://github.com/strettch/coolify-nextjs-store)
-- [Backend Source Code](https://github.com/strettch/coolify-express-api)
+- [Frontend Source Code](https://github.com/strettch-cloud/coolify-nextjs-store)
+- [Backend Source Code](https://github.com/strettch-cloud/coolify-express-api)
 - [Live Demo](https://shopease.strettchcloud.com)
 
 ## FAQs
