@@ -2,9 +2,9 @@
 
 ### Introduction
 
-In this tutorial, you will deploy **ShopEase**, a full-stack ecommerce application, on a [Strettch Cloud](https://cloud.strettch.com) VPS using [Coolify](https://coolify.io) — an open-source, self-hosted platform for managing app deployments.
+In this tutorial, you will deploy **ShopEase**, a full-stack ecommerce application, on a [Strettch Cloud](https://cloud.strettch.com) using [Coolify](https://coolify.io) — an open-source, self-hosted platform for managing app deployments.
 
-ShopEase consists of three services: a **Next.js 15** frontend for the storefront, an **Express.js** backend API handling authentication and orders, and a **MongoDB 7** database. Coolify orchestrates all three inside Docker containers and uses **Traefik** as a reverse proxy to handle routing and automatic SSL certificates.
+ShopEase consists of three services: a **Next.js 15** frontend for the customer UI, an **Express.js** backend API handling authentication and orders, and a **MongoDB 7** database. Coolify orchestrates all three inside Docker containers and uses **Traefik** as a reverse proxy to handle routing and automatic SSL certificates.
 
 By the end of this guide, you will have a production-ready application with HTTPS, automated Docker builds, and auto-deploy on every git push — all managed through a web dashboard.
 
