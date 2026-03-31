@@ -18,9 +18,9 @@ By the end of this guide, you will have a production-ready application with HTTP
 
 ```
 Browser → Traefik (reverse proxy + auto-SSL)
-            ├── shopease.yourdomain.com      → Next.js Frontend (port 3000)
-            ├── api.shopease.yourdomain.com   → Express.js API (port 5000)
-            └── coolify.yourdomain.com:8000   → Coolify Dashboard
+            ├── shopease.strettchcloud.com      → Next.js Frontend (port 3000)
+            ├── api.shopease.strettchcloud.com   → Express.js API (port 5000)
+            └── coolify.strettchcloud.com:8000   → Coolify Dashboard
 
             MongoDB (port 27017, internal only)
 ```
@@ -124,16 +124,16 @@ In your domain registrar or DNS provider, create three **A records** pointing to
 | A    | `api.shopease` | YOUR_VPS_IP | 300 |
 | A    | `coolify`      | YOUR_VPS_IP | 300 |
 
-For example, if your domain is `example.com`, these records will create:
+For example, if your domain is `strettchcloud.com`, these records will create:
 
-- `shopease.example.com` — the Next.js frontend
-- `api.shopease.example.com` — the Express.js backend API
-- `coolify.example.com` — the Coolify dashboard
+- `shopease.strettchcloud.com` — the Next.js frontend
+- `api.shopease.strettchcloud.com` — the Express.js backend API
+- `coolify.strettchcloud.com` — the Coolify dashboard
 
 DNS propagation usually takes 1 to 5 minutes. You can verify that your records are active by running:
 
 ```bash
-dig shopease.yourdomain.com +short
+dig shopease.strettchcloud.com +short
 ```
 
 You should see your VPS IP address in the output.
@@ -216,10 +216,10 @@ In this step, you will deploy the Express.js API, configure its environment vari
 On the configuration page, update the following settings under **General**:
 
 - **Name:** `shopease-api`
-- **Domain:** `https://api.shopease.yourdomain.com`
+- **Domain:** `https://api.shopease.strettchcloud.com`
 - **Ports Exposes:** `5000`
 
-> **Warning:** The Domain field **must** include the `https://` prefix. For example, enter `https://api.shopease.yourdomain.com` — not `api.shopease.yourdomain.com`. If you omit the protocol, Traefik will fail to route traffic to your application. You will see "404 page not found" errors, and SSL will not be provisioned. This is the single most common deployment mistake with Coolify.
+> **Warning:** The Domain field **must** include the `https://` prefix. For example, enter `https://api.shopease.strettchcloud.com` — not `api.shopease.strettchcloud.com`. If you omit the protocol, Traefik will fail to route traffic to your application. You will see "404 page not found" errors, and SSL will not be provisioned. This is the single most common deployment mistake with Coolify.
 
 Click **Save**.
 
@@ -233,7 +233,7 @@ Click **Save**.
 MONGODB_URI=mongodb://root:GENERATED_PASSWORD@CONTAINER_ID:27017/shopease?authSource=admin&directConnection=true
 JWT_SECRET=your-secret-key-change-this-to-something-random
 PORT=5000
-FRONTEND_URL=https://shopease.yourdomain.com
+FRONTEND_URL=https://shopease.strettchcloud.com
 ```
 
 4. Click **Save All Environment Variables**.
@@ -247,7 +247,7 @@ Click the **Deploy** button. Coolify will clone the repository, build the Docker
 Once the deployment succeeds, verify the API is running:
 
 ```bash
-curl https://api.shopease.yourdomain.com/api/health
+curl https://api.shopease.strettchcloud.com/api/health
 ```
 
 You should see:
@@ -286,7 +286,7 @@ Done!
 Verify that the products are available:
 
 ```bash
-curl https://api.shopease.yourdomain.com/api/products
+curl https://api.shopease.strettchcloud.com/api/products
 ```
 
 ## Step 7 — Deploying the Next.js Frontend
@@ -307,10 +307,10 @@ In this step, you will deploy the Next.js storefront and connect it to the backe
 On the configuration page, update the following settings under **General**:
 
 - **Name:** `shopease-store`
-- **Domain:** `https://shopease.yourdomain.com`
+- **Domain:** `https://shopease.strettchcloud.com`
 - **Ports Exposes:** `3000`
 
-> **Warning:** As with the backend, the Domain field **must** include `https://`. Enter `https://shopease.yourdomain.com` — not `shopease.yourdomain.com`. Omitting the protocol will break Traefik routing and prevent SSL provisioning.
+> **Warning:** As with the backend, the Domain field **must** include `https://`. Enter `https://shopease.strettchcloud.com` — not `shopease.strettchcloud.com`. Omitting the protocol will break Traefik routing and prevent SSL provisioning.
 
 Click **Save**.
 
@@ -321,7 +321,7 @@ Click **Save**.
 3. Add the following variable:
 
 ```env
-NEXT_PUBLIC_API_URL=https://api.shopease.yourdomain.com
+NEXT_PUBLIC_API_URL=https://api.shopease.strettchcloud.com
 ```
 
 4. Click **Save All Environment Variables**.
@@ -339,7 +339,7 @@ Click **Deploy**. The Next.js build is more resource-intensive than the backend 
 > docker builder prune -f
 > ```
 
-Once deployed, visit `https://shopease.yourdomain.com` in your browser. You should see the ShopEase storefront displaying all 10 products.
+Once deployed, visit `https://shopease.strettchcloud.com` in your browser. You should see the ShopEase storefront displaying all 10 products.
 
 ## Step 8 — Testing the Application
 
@@ -363,21 +363,21 @@ Use `curl` to verify the backend API directly:
 
 ```bash
 # Health check
-curl https://api.shopease.yourdomain.com/api/health
+curl https://api.shopease.strettchcloud.com/api/health
 
 # Get all products
-curl https://api.shopease.yourdomain.com/api/products
+curl https://api.shopease.strettchcloud.com/api/products
 
 # Filter products by category
-curl https://api.shopease.yourdomain.com/api/products?category=Electronics
+curl https://api.shopease.strettchcloud.com/api/products?category=Electronics
 
 # Register a new user
-curl -X POST https://api.shopease.yourdomain.com/api/auth/register \
+curl -X POST https://api.shopease.strettchcloud.com/api/auth/register \
   -H "Content-Type: application/json" \
   -d '{"name": "Test User", "email": "test@example.com", "password": "password123"}'
 
 # Log in
-curl -X POST https://api.shopease.yourdomain.com/api/auth/login \
+curl -X POST https://api.shopease.strettchcloud.com/api/auth/login \
   -H "Content-Type: application/json" \
   -d '{"email": "test@example.com", "password": "password123"}'
 ```
