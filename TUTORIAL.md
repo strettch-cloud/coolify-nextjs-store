@@ -8,10 +8,6 @@ ShopEase consists of three services: a **Next.js 15** frontend for the customer 
 
 By the end of this guide, you will have a production-ready application with HTTPS, automated Docker builds, and auto-deploy on every git push — all managed through a web dashboard.
 
-**Source code:**
-
-- Frontend: [strettch-cloud/coolify-nextjs-store](https://github.com/strettch-cloud/coolify-nextjs-store)
-- Backend: [strettch-cloud/coolify-express-api](https://github.com/strettch-cloud/coolify-express-api)
 - Live demo: [shopease.strettchcloud.com](https://shopease.strettchcloud.com)
 
 **Architecture overview:**
@@ -29,34 +25,34 @@ Browser → Traefik (reverse proxy + auto-SSL)
 
 Before you begin, make sure you have the following:
 
-- A [Strettch Cloud](https://cloud.strettch.com) account for provisioning a VPS
+- A [Strettch Cloud](https://cloud.strettch.com) account for provisioning a VM
 - A [GitHub](https://github.com) account to host and connect your repositories
 - A registered domain name with access to its DNS settings (you will create subdomains for each service)
 - Basic familiarity with the terminal, SSH, and command-line tools
 
-## Step 1 — Creating a VPS on Strettch Cloud
+## Step 1 — Creating a VM on Strettch Cloud
 
 Create a compute instance on Strettch Cloud with at least **2 vCPUs, 4 GB RAM, and 40 GB SSD** running **Ubuntu 24.04 LTS**. For a step-by-step walkthrough, see the [Strettch Cloud quickstart guide](https://docs.cloud.strettch.com/getting-started/quickstart#step-2-create-your-first-compute-instance).
 
 > **Note:** 4 GB of RAM is the recommended minimum. Coolify itself uses approximately 1.5 GB, and the Next.js Docker build process requires additional memory. Servers with 2 GB of RAM will likely experience build failures.
 
-Once the server is ready, note your **public IP address** (referred to as `YOUR_VPS_IP` throughout this tutorial) and connect via SSH:
+Once the VM is ready, note your **public IP address** (referred to as `YOUR_VPS_IP` throughout this tutorial) and connect via SSH:
 
 ```bash
 ssh root@YOUR_VPS_IP
 ```
 
-If your server uses a custom SSH port (Strettch Cloud uses port `222`), specify it with the `-p` flag:
+If your VM uses a custom SSH port (Strettch Cloud uses port `222`), specify it with the `-p` flag:
 
 ```bash
 ssh root@YOUR_VPS_IP -p 222
 ```
 
-You now have a running VPS ready for Coolify installation.
+You now have a running VM ready for Coolify installation.
 
 ## Step 2 — Installing Coolify
 
-In this step, you will install Coolify on your VPS. Coolify provides a one-line installer that sets up Docker, Docker Compose, and the Coolify platform automatically.
+In this step, you will install Coolify on your VM. Coolify provides a one-line installer that sets up Docker, Docker Compose, and the Coolify platform automatically.
 
 Run the following command on your server:
 
@@ -93,7 +89,7 @@ You can access Coolify through your Public IPV4: http://YOUR_VPS_IP:8000
 1. Open `http://YOUR_VPS_IP:8000` in your browser.
 2. Create your admin account by entering an email and password.
 3. On the onboarding screen, click **Let's go!**
-4. Choose **This Machine (Quick Start)** — this deploys everything on the same server running Coolify.
+4. Choose **This Machine (Quick Start)** — this deploys everything on the same VM running Coolify.
 5. Click **Create My First Project**.
 6. Click **Go to Dashboard**.
 
@@ -101,11 +97,11 @@ You now have Coolify running with a default project called "My first project" an
 
 ## Step 3 — Setting Up DNS Records
 
-In this step, you will create DNS records that point your subdomains to the VPS. This is required before deploying any services so that Traefik can route traffic and provision SSL certificates.
+In this step, you will create DNS records that point your subdomains to the VM. This is required before deploying any services so that Traefik can route traffic and provision SSL certificates.
 
 > **Note:** Throughout this tutorial, replace `YOUR_DOMAIN` with your registered domain name wherever it appears in configuration values, commands, and URLs.
 
-In your domain registrar or DNS provider, create three **A records** pointing to your VPS IP address:
+In your domain registrar or DNS provider, create three **A records** pointing to your VM's IP address:
 
 | Type | Name           | Value       | TTL |
 | ---- | -------------- | ----------- | --- |
@@ -125,7 +121,7 @@ DNS propagation usually takes 1 to 5 minutes. You can verify that your records a
 dig shopease.YOUR_DOMAIN +short
 ```
 
-You should see your VPS IP address in the output.
+You should see your VM's IP address in the output.
 
 ## Step 4 — Connecting GitHub to Coolify
 
@@ -384,7 +380,7 @@ Since you connected GitHub via a GitHub App in Step 4, any push to the `main` br
 
 You have successfully deployed a full-stack ecommerce application on Strettch Cloud using Coolify. Your setup includes:
 
-- A **Strettch Cloud VPS** running Ubuntu 24.04 with Coolify installed
+- A **Strettch Cloud VM** running Ubuntu 24.04 with Coolify installed
 - A **MongoDB** database accessible only through the internal Docker network
 - An **Express.js** backend API with JWT authentication, seeded with sample data
 - A **Next.js** frontend storefront connected to the API
@@ -397,15 +393,13 @@ For more information, refer to the following resources:
 
 - [Strettch Cloud](https://cloud.strettch.com)
 - [Coolify Documentation](https://coolify.io/docs)
-- [Frontend Source Code](https://github.com/strettch-cloud/coolify-nextjs-store)
-- [Backend Source Code](https://github.com/strettch-cloud/coolify-express-api)
 - [Live Demo](https://shopease.strettchcloud.com)
 
 ## FAQs
 
 **Q: Why do I need 4 GB of RAM? Can I use a smaller server?**
 
-Coolify itself consumes approximately 1.5 GB of RAM. The Next.js Docker build process is memory-intensive and requires additional headroom. With only 2 GB of RAM, builds are likely to fail with out-of-memory errors. A server with 2 vCPUs and 4 GB of RAM is the recommended minimum for this stack.
+Coolify itself consumes approximately 1.5 GB of RAM. The Next.js Docker build process is memory-intensive and requires additional headroom. With only 2 GB of RAM, builds are likely to fail with out-of-memory errors. A VM with 2 vCPUs and 4 GB of RAM is the recommended minimum for this stack.
 
 **Q: Why does the Domain field in Coolify require the `https://` prefix?**
 
@@ -425,4 +419,4 @@ In Coolify, navigate to your MongoDB resource and open the **Backups** tab. You 
 
 **Q: The build failed with exit code 255. What should I do?**
 
-This is typically a transient Docker BuildKit error. Click **Redeploy** in Coolify to retry. If the error persists, SSH into your server and clear the build cache with `docker builder prune -f`, then redeploy from the Coolify dashboard.
+This is typically a transient Docker BuildKit error. Click **Redeploy** in Coolify to retry. If the error persists, SSH into your VM and clear the build cache with `docker builder prune -f`, then redeploy from the Coolify dashboard.
