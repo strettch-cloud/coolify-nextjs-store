@@ -8,8 +8,6 @@ ShopEase consists of three services: a **Next.js 15** frontend for the customer 
 
 By the end of this guide, you will have a production-ready application with HTTPS, automated Docker builds, and auto-deploy on every git push — all managed through a web dashboard.
 
-- Live demo: [shopease.strettchcloud.com](https://shopease.strettchcloud.com)
-
 **Architecture overview:**
 
 ```
@@ -393,7 +391,6 @@ For more information, refer to the following resources:
 
 - [Strettch Cloud](https://cloud.strettch.com)
 - [Coolify Documentation](https://coolify.io/docs)
-- [Live Demo](https://shopease.strettchcloud.com)
 
 ## FAQs
 
