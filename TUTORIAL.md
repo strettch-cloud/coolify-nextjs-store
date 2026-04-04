@@ -312,56 +312,6 @@ Click **Deploy**. The Next.js build is more resource-intensive than the backend 
 
 Once deployed, visit `https://shopease.YOUR_DOMAIN` in your browser. You should see the ShopEase storefront displaying all 10 products.
 
-## Step 8 — Testing the Application
-
-In this step, you will verify that the full application works end-to-end, test API endpoints directly, and confirm that auto-deploy is functional.
-
-### Testing the User Flow
-
-Walk through the complete storefront experience:
-
-1. **Browse products** — Visit the homepage and use the category filters.
-2. **View a product** — Click any product card to see its detail page.
-3. **Add to cart** — Click "Add to cart" on a product.
-4. **View cart** — Navigate to the cart page and adjust quantities.
-5. **Register** — Create an account with any email and a password of at least 6 characters.
-6. **Checkout** — Enter a shipping address and place the order.
-7. **View orders** — Check your order history page.
-
-### Testing API Endpoints
-
-Use `curl` to verify the backend API directly:
-
-```bash
-# Health check
-curl https://api.shopease.YOUR_DOMAIN/api/health
-
-# Get all products
-curl https://api.shopease.YOUR_DOMAIN/api/products
-
-# Filter products by category
-curl https://api.shopease.YOUR_DOMAIN/api/products?category=Electronics
-
-# Register a new user
-curl -X POST https://api.shopease.YOUR_DOMAIN/api/auth/register \
-  -H "Content-Type: application/json" \
-  -d '{"name": "Test User", "email": "test@example.com", "password": "password123"}'
-
-# Log in
-curl -X POST https://api.shopease.YOUR_DOMAIN/api/auth/login \
-  -H "Content-Type: application/json" \
-  -d '{"email": "test@example.com", "password": "password123"}'
-```
-
-### Testing Auto-Deploy
-
-Since you connected GitHub via a GitHub App in Step 4, any push to the `main` branch triggers an automatic deployment. To test this:
-
-1. Make a small change in one of your forked repositories (for example, update a product name in `src/seed.js`).
-2. Commit and push the change to `main`.
-3. In Coolify, navigate to your application and open the **Deployments** tab.
-4. You should see a new deployment triggered automatically within a few seconds.
-
 ## Conclusion
 
 You have successfully deployed a full-stack ecommerce application on Strettch Cloud using Coolify. Your setup includes:
