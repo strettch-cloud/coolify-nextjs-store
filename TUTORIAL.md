@@ -34,19 +34,7 @@ Create a compute instance on Strettch Cloud with at least **2 vCPUs, 4 GB RAM, a
 
 > **Note:** 4 GB of RAM is the recommended minimum. Coolify itself uses approximately 1.5 GB, and the Next.js Docker build process requires additional memory. Servers with 2 GB of RAM will likely experience build failures.
 
-Once the VM is ready, note your **public IP address** (referred to as `YOUR_VPS_IP` throughout this tutorial) and connect via SSH:
-
-```bash
-ssh root@YOUR_VPS_IP
-```
-
-If your VM uses a custom SSH port (Strettch Cloud uses port `222`), specify it with the `-p` flag:
-
-```bash
-ssh root@YOUR_VPS_IP -p 222
-```
-
-You now have a running VM ready for Coolify installation.
+Once the VM is ready, note your **public IP address** (referred to as `YOUR_VM_IP` throughout this tutorial).
 
 ## Step 2 — Installing Coolify
 
@@ -72,7 +60,7 @@ When it finishes, you will see a message like:
 
 ```
 Your instance is ready to use!
-You can access Coolify through your Public IPV4: http://YOUR_VPS_IP:8000
+You can access Coolify through your Public IPV4: http://YOUR_VM_IP:8000
 ```
 
 > **Note:** If you encounter a `dpkg lock` error, the system is running background package updates. Wait a moment and retry:
@@ -84,7 +72,7 @@ You can access Coolify through your Public IPV4: http://YOUR_VPS_IP:8000
 
 ### Completing the Initial Setup
 
-1. Open `http://YOUR_VPS_IP:8000` in your browser.
+1. Open `http://YOUR_VM_IP:8000` in your browser.
 2. Create your admin account by entering an email and password.
 3. On the onboarding screen, click **Let's go!**
 4. Choose **This Machine (Quick Start)** — this deploys everything on the same VM running Coolify.
@@ -101,11 +89,11 @@ In this step, you will create DNS records that point your subdomains to the VM. 
 
 In your domain registrar or DNS provider, create three **A records** pointing to your VM's IP address:
 
-| Type | Name           | Value       | TTL |
-| ---- | -------------- | ----------- | --- |
-| A    | `shopease`     | YOUR_VPS_IP | 300 |
-| A    | `api.shopease` | YOUR_VPS_IP | 300 |
-| A    | `coolify`      | YOUR_VPS_IP | 300 |
+| Type | Name           | Value      | TTL |
+| ---- | -------------- | ---------- | --- |
+| A    | `shopease`     | YOUR_VM_IP | 300 |
+| A    | `api.shopease` | YOUR_VM_IP | 300 |
+| A    | `coolify`      | YOUR_VM_IP | 300 |
 
 For example, if your domain is `YOUR_DOMAIN`, these records will create:
 
@@ -391,29 +379,3 @@ For more information, refer to the following resources:
 
 - [Strettch Cloud](https://cloud.strettch.com)
 - [Coolify Documentation](https://coolify.io/docs)
-
-## FAQs
-
-**Q: Why do I need 4 GB of RAM? Can I use a smaller server?**
-
-Coolify itself consumes approximately 1.5 GB of RAM. The Next.js Docker build process is memory-intensive and requires additional headroom. With only 2 GB of RAM, builds are likely to fail with out-of-memory errors. A VM with 2 vCPUs and 4 GB of RAM is the recommended minimum for this stack.
-
-**Q: Why does the Domain field in Coolify require the `https://` prefix?**
-
-Coolify uses the protocol in the Domain field to configure Traefik routing rules and SSL certificate provisioning. When you include `https://`, Traefik knows to request a Let's Encrypt certificate and terminate TLS. Without it, Traefik cannot route traffic correctly, resulting in "404 page not found" errors.
-
-**Q: I changed `NEXT_PUBLIC_API_URL` but the frontend still points to the old URL. What happened?**
-
-Next.js bakes `NEXT_PUBLIC_` environment variables into the JavaScript bundle at build time. Restarting the container does not update these values. You must trigger a full **Redeploy** from the Coolify dashboard so that Next.js rebuilds with the new value.
-
-**Q: Can I use a different database instead of MongoDB?**
-
-Yes. Coolify supports PostgreSQL, MySQL, MariaDB, and Redis out of the box. However, the ShopEase backend is built with Mongoose (a MongoDB ODM), so switching databases would require rewriting the data layer.
-
-**Q: How do I set up automatic database backups?**
-
-In Coolify, navigate to your MongoDB resource and open the **Backups** tab. You can configure scheduled backups to local storage or an S3-compatible object storage provider. Refer to the [Coolify documentation](https://coolify.io/docs) for detailed backup configuration instructions.
-
-**Q: The build failed with exit code 255. What should I do?**
-
-This is typically a transient Docker BuildKit error. Click **Redeploy** in Coolify to retry. If the error persists, SSH into your VM and clear the build cache with `docker builder prune -f`, then redeploy from the Coolify dashboard.
