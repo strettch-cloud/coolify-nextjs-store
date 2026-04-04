@@ -36,24 +36,11 @@ Before you begin, make sure you have the following:
 
 ## Step 1 — Creating a VPS on Strettch Cloud
 
-In this step, you will provision a virtual private server on Strettch Cloud. This server will host Coolify and all three application services.
-
-1. Log in to [cloud.strettch.com](https://cloud.strettch.com).
-2. Click **Create Server** and configure it with the following specs:
-
-   | Setting  | Value             |
-   | -------- | ----------------- |
-   | OS       | Ubuntu 24.04 LTS  |
-   | CPU      | 2 vCPUs           |
-   | RAM      | 4 GB              |
-   | Disk     | 40 GB+ SSD        |
-
-3. Click **Create** and wait for the server to become active.
-4. Note your server's **public IP address**. This tutorial refers to it as `YOUR_VPS_IP`.
+Create a compute instance on Strettch Cloud with at least **2 vCPUs, 4 GB RAM, and 40 GB SSD** running **Ubuntu 24.04 LTS**. For a step-by-step walkthrough, see the [Strettch Cloud quickstart guide](https://docs.cloud.strettch.com/getting-started/quickstart#step-2-create-your-first-compute-instance).
 
 > **Note:** 4 GB of RAM is the recommended minimum. Coolify itself uses approximately 1.5 GB, and the Next.js Docker build process requires additional memory. Servers with 2 GB of RAM will likely experience build failures.
 
-Once the server is ready, connect via SSH:
+Once the server is ready, note your **public IP address** (referred to as `YOUR_VPS_IP` throughout this tutorial) and connect via SSH:
 
 ```bash
 ssh root@YOUR_VPS_IP
